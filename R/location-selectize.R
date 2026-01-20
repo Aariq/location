@@ -8,19 +8,20 @@ library(dplyr)
 #' input closest to the user (if they have location services allowed).
 #'
 #' @param id
-#' @param locations_df a data frame with the columns `choice`, `lat`, and `lon`.
 #' @param label passed to [shiny::selectInput()].
+#' @param locations_df a data frame with the columns `choice`, `lat`, and `lon`.
 location_selectize_ui <- function(
   id,
-  locations_df,
-  label = "Select Location:"
+  label = "Select Location:",
+  locations_df
 ) {
   ns <- NS(id)
 
   # Create named vector for selectize choices
   # The value will be "lat,lon" and the name will be the choice
   choices <- setNames(
-    paste0(locations_df$lat, ",", locations_df$lon),
+    # paste0(locations_df$lat, ",", locations_df$lon),
+    locations_df$value,
     locations_df$choice
   )
 
@@ -44,7 +45,7 @@ location_selectize_ui <- function(
     div(
       style = "padding-top: 15px;", # centers the button with the drop-down (roughly)
       geoloc::button_geoloc(
-        ns("get_location"),
+        ns("user_location"),
         icon("location-dot"),
         class = "btn btn-sm"
       )
@@ -55,17 +56,17 @@ location_selectize_ui <- function(
 #' Selectize with location button (server module)
 #'
 #' @param id same ID as provided to `location_selectize_ui()`.
-#' @param locations_df same data frame as provided to `locations_selectize_ui()`
+#' @param locations_df same data frame as provided to `locations_selectize_ui()`.
 location_selectize_server <- function(id, locations_df) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # Update selectize when location is received
     observe({
-      req(input$get_location_lat, input$get_location_lon)
+      req(input$user_location_lat, input$user_location_lon)
 
-      user_lat <- as.numeric(input$get_location_lat)
-      user_lon <- as.numeric(input$get_location_lon)
+      user_lat <- as.numeric(input$user_location_lat)
+      user_lon <- as.numeric(input$user_location_lon)
 
       # Find nearest location using Haversine distance
       distances <- sapply(1:nrow(locations_df), function(i) {
@@ -82,20 +83,16 @@ location_selectize_server <- function(id, locations_df) {
       })
 
       nearest_idx <- which.min(distances)
-      nearest_value <- paste0(
-        locations_df$lat[nearest_idx],
-        ",",
-        locations_df$lon[nearest_idx]
-      )
+      nearest_location <- locations_df[nearest_idx, ]
 
       # Update the selectize input
       updateSelectizeInput(
         session,
         "location",
-        selected = nearest_value
+        selected = nearest_location$value
       )
     }) |>
-      bindEvent(input$get_location)
+      bindEvent(input$user_location)
 
     # # Return the selected value as a reactive
     return(reactive(input$location))
