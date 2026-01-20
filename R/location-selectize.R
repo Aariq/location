@@ -2,6 +2,10 @@
 library(geoloc)
 library(dplyr)
 
+# TODO: first click of location button doesn't update station.  Possibly  need to
+# "deconstruct" the geoloc button using other functions from that package to get
+# this to work
+
 #' Selectize with location button (UI module)
 #'
 #' A select drop-down input with a location button next to it to choose the
@@ -9,11 +13,15 @@ library(dplyr)
 #'
 #' @param id
 #' @param label passed to [shiny::selectInput()].
-#' @param locations_df a data frame with the columns `choice`, `lat`, and `lon`.
+#' @param locations_df a data frame with the columns `choice`, `value`, `lat`,
+#'   and `lon`.
+#' @param selected passed to [shiny::selectInput()]; once of the `value`
+#'   options in `locations_df`.
 location_selectize_ui <- function(
   id,
   label = "Select Location:",
-  locations_df
+  locations_df,
+  selected = NULL
 ) {
   ns <- NS(id)
 
@@ -35,11 +43,11 @@ location_selectize_ui <- function(
     div(
       # style = "flex-grow: 1;", #let the drop-down grow to take up the whole space
       style = "flex-basis: 20rem;", #let the drop-down grow to a max of 20rem
-      selectizeInput(
+      selectInput(
         ns("location"),
         label,
         choices = choices,
-        selected = NULL
+        selected = selected
       )
     ),
     div(
@@ -92,7 +100,7 @@ location_selectize_server <- function(id, locations_df) {
         selected = nearest_location$value
       )
     }) |>
-      bindEvent(input$user_location)
+      bindEvent(input$user_location) #ID for button
 
     # # Return the selected value as a reactive
     return(reactive(input$location))
