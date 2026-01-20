@@ -67,8 +67,6 @@ location_selectize_ui <- function(
 #' @param locations_df same data frame as provided to `locations_selectize_ui()`.
 location_selectize_server <- function(id, locations_df) {
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
-
     # Update selectize when location is received
     observe({
       req(input$user_location_lat, input$user_location_lon)
@@ -103,6 +101,6 @@ location_selectize_server <- function(id, locations_df) {
       bindEvent(input$user_location) #ID for button
 
     # # Return the selected value as a reactive
-    return(reactive(input$location))
+    reactive(input$location)
   })
 }

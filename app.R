@@ -21,7 +21,7 @@ ui <- page_sidebar(
       "loc_module",
       "Select a station:",
       station_choices,
-      selected = "Roll"
+      selected = "az02"
     ),
     hr(),
     p(
