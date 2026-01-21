@@ -2,10 +2,6 @@
 library(geoloc)
 library(dplyr)
 
-# TODO: first click of location button doesn't update station.  Possibly  need to
-# "deconstruct" the geoloc button using other functions from that package to get
-# this to work
-
 #' Selectize with location button (UI module)
 #'
 #' A select drop-down input with a location button next to it to choose the
@@ -98,7 +94,8 @@ location_selectize_server <- function(id, locations_df) {
         selected = nearest_location$value
       )
     }) |>
-      bindEvent(input$user_location) #ID for button
+      # run when the location is updated (not just when the button is pressed)
+      bindEvent(input$user_location_lat, input$user_location_lon)
 
     # # Return the selected value as a reactive
     reactive(input$location)
