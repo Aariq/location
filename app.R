@@ -36,11 +36,28 @@ ui <- page_sidebar(
     card_header("User Coordinates"),
     verbatimTextOutput("coords_info")
   )
-)
+) |>
+  add_cookie_handlers()
 
 # Main App Server
 server <- function(input, output, session) {
   selected_location <- location_selectize_server("loc_module", station_choices)
+
+  observeEvent(selected_location(), {
+    set_cookie(
+      cookie_name = "selected_station",
+      cookie_value = selected_location()
+    )
+  })
+
+  observeEvent(
+    get_cookie("selected_station"),
+    updateSelectInput(
+      inputId = "loc_module-location",
+      selected = get_cookie("selected_station")
+    ),
+    once = TRUE
+  )
 
   output$selected_info <- renderPrint({
     if (is.null(selected_location())) {
