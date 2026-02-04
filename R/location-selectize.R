@@ -95,7 +95,11 @@ location_selectize_server <- function(id, locations_df) {
       )
     }) |>
       # run when the location is updated (not just when the button is pressed)
-      bindEvent(input$user_location_lat, input$user_location_lon)
+      bindEvent(
+        input$user_location_lat,
+        input$user_location_lon,
+        input$user_location
+      )
 
     # # Return the selected value as a reactive
     reactive(input$location)
